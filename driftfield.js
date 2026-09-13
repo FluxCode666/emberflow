@@ -5,7 +5,7 @@ function mountDriftfield(canvas, options = {}) {
   const ctx = context;
   const config = {
     color: '#f5f0e8', background: '#131516', seed: 23,
-    density: 0.68, speed: 1, size: 1, height: 320,
+    density: 0.68, speed: 1, size: 1, tailVariance: 8, height: 320,
     glow: 24, pointerStrength: 30, pointer: true, lowPerf: false, gap: 9, ...options
   };
   let width = 0, height = 0, columns = 0;
@@ -84,7 +84,8 @@ function mountDriftfield(canvas, options = {}) {
       const tailNoise = flowingNoiseX(config.seed + 97, fieldX + 7, fieldY + 31);
       const tailDrift = flowingNoiseX(config.seed + 503, p.x * 0.16 + time / 1000 * 0.48, p.y * 0.16 + 23);
       const tailSignal = Math.max(0, Math.min(1, tailNoise + (tailDrift - 0.5) * 0.26));
-      const tailLimit = 18 + flowingNoiseX(config.seed + 211, p.x * 0.18 + time / 1000 * 0.18, p.y * 0.18 + time / 1000 * 0.14 + 41) * 14;
+      const tailVariance = Math.max(3, Math.min(20, config.tailVariance));
+      const tailLimit = 32 - tailVariance + flowingNoiseX(config.seed + 211, p.x * 0.18 + time / 1000 * 0.18, p.y * 0.18 + time / 1000 * 0.14 + 41) * tailVariance;
       if (distance < -tailLimit) continue;
       const tone = Math.min(1, Math.max(0, (noise - 0.16) / 0.72));
       const tailTone = Math.min(1, Math.max(0, (tailSignal - 0.18) / 0.82));

@@ -30,7 +30,7 @@ React 和 Vue 3 版本默认从同目录的 `driftfield.js` 引入共享引擎�
 </script>
 ```
 
-可调参数：`color`、`density`、`speed`、`size`、`height`（50–500px）、`pointerStrength`（0–100%）和 `gap`。展示页还提供 Midnight、Milk、Signal 三组预设、指针排斥、低性能模式和 JSON 配置导出。
+可调参数：`color`、`density`、`speed`、`size`、`height`（50–500px）、`pointerStrength`（0–100%）、`tailVariance`（3–20 格）和 `gap`。展示页还提供 Midnight、Milk、Signal 三组预设、指针排斥、低性能模式和 JSON 配置导出。
 
 ## 文件
 
