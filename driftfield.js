@@ -5,7 +5,7 @@ function mountDriftfield(canvas, options = {}) {
   const ctx = context;
   const config = {
     color: '#f5f0e8', background: '#131516', seed: 23,
-    density: 0.68, speed: 1, size: 1, tailVariance: 8, height: 320,
+    density: 0.68, speed: 1, size: 1, tailVariance: 8, gapRate: 0.3, height: 320,
     glow: 24, pointerStrength: 30, pointer: true, lowPerf: false, gap: 9, ...options
   };
   let width = 0, height = 0, columns = 0;
@@ -96,6 +96,9 @@ function mountDriftfield(canvas, options = {}) {
       const hotEmber = distance < 0 && distance >= -8 && noise > 0.52;
       const trail = distance < -8 && tailSignal > 0.3 + tailProgress * 0.34;
       if (!(distance >= 0 ? distance > 2 || noise > 0.18 : hotEmber || trail)) continue;
+      const gapRate = Math.max(0, Math.min(1, config.gapRate));
+      const gapSample = flowingNoiseX(config.seed + 607, fieldX * 1.35 + fieldY * 0.1, fieldY * 1.15 + 17);
+      if (gapRate > 0 && gapSample < gapRate) continue;
       const coverage = hotEmber ? Math.min(1, (noise - 0.52) / 0.48)
         : trail ? Math.max(0.24, (distance + tailLimit) / (tailLimit - 8)) : Math.min(1, Math.max(0, distance + 0.5));
       const fade = hotEmber || trail ? 1 : Math.min(1, 0.2 + Math.max(0, distance) / 18 * 0.8);
