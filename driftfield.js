@@ -92,7 +92,6 @@ function mountDriftfield(canvas, options = {}) {
       if (distance < -tailLimit) continue;
       const tailProgress = Math.max(0, Math.min(1, (-distance - 8) / Math.max(1, tailLimit - 8)));
       const tone = Math.min(1, Math.max(0, (noise - 0.16) / 0.72));
-      const tailTone = Math.min(1, Math.max(0, (tailSignal - 0.18) / 0.82));
       const gapRate = Math.max(0, Math.min(1, config.gapRate));
       const hotEmber = distance < 0 && distance >= -8 && noise > 0.52;
       const trail = distance < -8 && (gapRate === 0 || tailSignal > 0.3 + tailProgress * 0.34);
@@ -102,11 +101,11 @@ function mountDriftfield(canvas, options = {}) {
       const naturalTailCoverage = Math.max(0.45, 1 - tailProgress * 0.55);
       const coverage = gapRate === 0
         ? (distance < 0 ? naturalTailCoverage : 1)
-        : hotEmber ? Math.min(1, (noise - 0.52) / 0.48)
+        : hotEmber ? 1
           : trail ? Math.max(0.24, (distance + tailLimit) / (tailLimit - 8)) : Math.min(1, Math.max(0, distance + 0.5));
-      const fade = hotEmber || trail ? 1 : Math.min(1, 0.2 + Math.max(0, distance) / 18 * 0.8);
-      let alpha = (hotEmber ? 0.28 + tone * 0.62 : trail ? 0.035 + tailTone * 0.34
-        : (0.07 + p.x / Math.max(1, columns - 1) * 0.34 + tone * 0.24) * fade) * coverage;
+      // Apply the same shading to the body and tail, with no ember highlight.
+      const geometricFade = Math.min(1, 0.2 + Math.max(0, distance) / 18 * 0.8);
+      let alpha = (0.07 + p.x / Math.max(1, columns - 1) * 0.34 + tone * 0.24) * geometricFade * coverage;
       if (gapRate === 0) alpha = Math.max(alpha, 0.16 * (distance < 0 ? naturalTailCoverage : 1));
       const px = left + p.x * config.gap + 4, py = p.y * config.gap + 4;
       let ox = 0, oy = 0;
