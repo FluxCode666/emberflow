@@ -130,7 +130,3 @@ NODE_PATH=/tmp/driftfield-browser-tools/node_modules node tests/flame-contour.cj
 默认使用 macOS 上的 Google Chrome。其他环境可通过 `CHROME_PATH` 指定 Chrome / Chromium 可执行文件；`FLAME_TEST_URL` 和 `FLAME_TEST_OUTPUT` 分别设置服务地址与结果目录。
 
 检查覆盖最长／最短行换位、0% 空缺时的连续性、50／320／500px 高度、3／8／20 格焰长差距、速度与长度解耦，以及复制代码与独立引擎的绘制一致性。默认截图与报告保存在 `/tmp/driftfield-contour`。
-
-## 视觉参考
-
-项目最初参考 oh-my-tab 的粒子点阵与 Tab 卡片背景效果，在此基础上加入动态焰尾轮廓、实时配置、模型效果示例和代码导出功能。
