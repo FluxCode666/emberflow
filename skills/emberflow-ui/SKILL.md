@@ -1,6 +1,6 @@
 ---
 name: emberflow-ui
-description: Create or adapt frontend interfaces with the Emberflow particle canvas style: left-flowing texture, independently moving flame tails, configurable density, height, gaps, pointer interaction, and reusable HTML/React/Vue integrations.
+description: "Create or adapt frontend interfaces with the Emberflow particle canvas style: left-flowing texture, independently moving flame tails, configurable density, height, gaps, pointer interaction, and reusable HTML/React/Vue integrations."
 metadata:
   short-description: Use the Emberflow particle UI style in frontend projects
 ---
