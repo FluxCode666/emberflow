@@ -93,10 +93,10 @@ function mountDriftfield(canvas, options = {}) {
       const tailProgress = Math.max(0, Math.min(1, (-distance - 8) / Math.max(1, tailLimit - 8)));
       const tone = Math.min(1, Math.max(0, (noise - 0.16) / 0.72));
       const tailTone = Math.min(1, Math.max(0, (tailSignal - 0.18) / 0.82));
-      const hotEmber = distance < 0 && distance >= -8 && noise > 0.52;
-      const trail = distance < -8 && tailSignal > 0.3 + tailProgress * 0.34;
-      if (!(distance >= 0 ? distance > 2 || noise > 0.18 : hotEmber || trail)) continue;
       const gapRate = Math.max(0, Math.min(1, config.gapRate));
+      const hotEmber = distance < 0 && distance >= -8 && noise > 0.52;
+      const trail = distance < -8 && (gapRate === 0 || tailSignal > 0.3 + tailProgress * 0.34);
+      if (!(distance >= 0 ? (gapRate === 0 || distance > 2 || noise > 0.18) : (gapRate === 0 || hotEmber || trail))) continue;
       const gapSample = flowingNoiseX(config.seed + 607, fieldX * 1.35 + fieldY * 0.1, fieldY * 1.15 + 17);
       if (gapRate > 0 && gapSample < gapRate) continue;
       const coverage = hotEmber ? Math.min(1, (noise - 0.52) / 0.48)
