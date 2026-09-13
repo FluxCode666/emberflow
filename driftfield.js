@@ -84,7 +84,7 @@ function mountDriftfield(canvas, options = {}) {
       const tailNoise = flowingNoiseX(config.seed + 97, fieldX + 7, fieldY + 31);
       const tailDrift = flowingNoiseX(config.seed + 503, p.x * 0.16 + time / 1000 * 0.48, p.y * 0.16 + 23);
       const tailSignal = Math.max(0, Math.min(1, tailNoise + (tailDrift - 0.5) * 0.26));
-      const tailLimit = 18 + flowingNoiseX(config.seed + 211, p.x * 0.18 + time / 1000 * 0.18, p.y * 0.18 + 41) * 14;
+      const tailLimit = 18 + flowingNoiseX(config.seed + 211, p.x * 0.18 + time / 1000 * 0.18, p.y * 0.18 + time / 1000 * 0.14 + 41) * 14;
       if (distance < -tailLimit) continue;
       const hotEmber = distance < 0 && distance >= -8 && noise > 0.52;
       const trail = distance < -8 && tailSignal > 0.52 + (-distance / tailLimit) * 0.18;
