@@ -86,14 +86,16 @@ function mountDriftfield(canvas, options = {}) {
       const tailSignal = Math.max(0, Math.min(1, tailNoise + (tailDrift - 0.5) * 0.26));
       const tailLimit = 18 + flowingNoiseX(config.seed + 211, p.x * 0.18 + time / 1000 * 0.18, p.y * 0.18 + time / 1000 * 0.14 + 41) * 14;
       if (distance < -tailLimit) continue;
+      const tone = Math.min(1, Math.max(0, (noise - 0.16) / 0.72));
+      const tailTone = Math.min(1, Math.max(0, (tailSignal - 0.18) / 0.82));
       const hotEmber = distance < 0 && distance >= -8 && noise > 0.52;
       const trail = distance < -8 && tailSignal > 0.52 + (-distance / tailLimit) * 0.18;
       if (!(distance >= 0 ? distance > 2 || noise > 0.18 : hotEmber || trail)) continue;
       const coverage = hotEmber ? Math.min(1, (noise - 0.52) / 0.48)
         : trail ? Math.max(0.2, (distance + tailLimit) / (tailLimit - 8)) : Math.min(1, Math.max(0, distance + 0.5));
       const fade = hotEmber || trail ? 1 : Math.min(1, 0.2 + Math.max(0, distance) / 18 * 0.8);
-      let alpha = (hotEmber ? 0.2 + (noise - 0.52) * 0.62 : trail ? 0.06 + tailSignal * 0.16
-        : (0.12 + p.x / Math.max(1, columns - 1) * 0.24 + noise * 0.12) * fade) * coverage;
+      let alpha = (hotEmber ? 0.28 + tone * 0.62 : trail ? 0.025 + tailTone * 0.3
+        : (0.07 + p.x / Math.max(1, columns - 1) * 0.34 + tone * 0.24) * fade) * coverage;
       const px = left + p.x * config.gap + 4, py = p.y * config.gap + 4;
       let ox = 0, oy = 0;
       if (config.pointer && pointer.active) {
