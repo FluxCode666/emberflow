@@ -63,7 +63,7 @@ function mountDriftfield(canvas, options = {}) {
   };
   const paint = (time) => {
     ctx.clearRect(0, 0, width, height);
-    const [r, g, b] = config.color.match(/.{2}/g).map(v => parseInt(v, 16));
+    const [r, g, b] = config.color.slice(1).match(/.{2}/g).map(v => parseInt(v, 16));
     particles.forEach(particle => {
       const value = particle.sample(time / 1000, 1, config.amplitude);
       const size = 8 * value.size;
