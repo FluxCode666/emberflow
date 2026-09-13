@@ -13,6 +13,26 @@
 - “查看代码”支持 JavaScript、HTML、TypeScript、React 和 Vue 3，代码随当前配置更新。
 - 支持导出当前配置为 JSON，以及减少粒子采样的低性能模式。
 
+## 安装 Emberflow Skill
+
+如果你使用支持 Agent Skills 的工具，可以直接从本仓库安装：
+
+```bash
+npx skills add FluxCode666/emberflow
+```
+
+也可以使用仓库自带的 npm 安装器，将技能复制到 Codex 用户目录：
+
+```bash
+npx @fluxcode666/emberflow install
+# 当前项目安装到 .agents/skills/
+npx @fluxcode666/emberflow install --scope project
+# 查看安装器帮助
+npx @fluxcode666/emberflow help
+```
+
+安装完成后，向 Agent 说明“使用 Emberflow UI skill”，或直接使用 `$emberflow-ui`。技能会指导 Agent 复用粒子引擎、保持色块向左流动、生成 HTML/React/Vue 接入，并在视觉改动后执行浏览器检查。
+
 ## 本地运行
 
 ```bash
@@ -110,6 +130,9 @@ TypeScript 选项提供包含 `DriftfieldOptions` 类型的实现模板，可根
 ## 项目结构
 
 ```text
+package.json                       npm 包信息与 npx 安装入口
+scripts/install-skill.mjs           Emberflow Skill 安装器
+skills/emberflow-ui/SKILL.md        可复用的 Agent Skill
 index.html                         展示页面、配置面板与代码弹窗
 styles.css                         页面样式与响应式布局
 app.js                             展示页动画、交互及代码生成

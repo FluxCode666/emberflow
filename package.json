@@ -1,0 +1,21 @@
+{
+  "name": "@fluxcode666/emberflow",
+  "version": "1.0.0",
+  "description": "Emberflow particle UI style and reusable Codex skill",
+  "license": "MIT",
+  "publishConfig": { "access": "public" },
+  "type": "module",
+  "bin": {
+    "emberflow-skill": "scripts/install-skill.mjs"
+  },
+  "files": [
+    "skills",
+    "scripts/install-skill.mjs",
+    "driftfield.js",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "keywords": ["codex-skill", "particle-ui", "canvas", "emberflow"],
+  "engines": { "node": ">=18" }
+}

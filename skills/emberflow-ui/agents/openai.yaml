@@ -1,0 +1,4 @@
+interface:
+  display_name: Emberflow UI
+  short_description: Reuse the Emberflow particle canvas style
+  default_prompt: Add or adapt a frontend UI using Emberflow's left-flowing particle canvas and independently moving flame tails.
