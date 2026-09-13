@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="浮游粒子实验室：一个可复用的 canvas 粒子背景效果 playground。" />
+    <title>浮游粒子实验室 · Driftfield</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Driftfield 首页">
+        <span class="brand-mark"><i></i><i></i><i></i><i></i></span>
+        <span>DRIFTFIELD</span>
+      </a>
+      <div class="top-meta">
+        <span class="status-dot"></span><span>CANVAS EFFECTS / 01</span>
+      </div>
+      <a class="reference-link" href="https://github.com/trynewthin/oh-my-tab" target="_blank" rel="noreferrer">参考源 ↗</a>
+    </header>
+
+    <main id="top">
+      <section class="hero-wrap">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">FLOATING PARTICLES · 可复用视觉模块</p>
+          <h1>让界面<br /><em>呼吸起来。</em></h1>
+          <p class="hero-lede">从 oh-my-tab 抽离的浮游点阵。用一个轻量 Canvas，把新标签页的静谧、深度和微妙运动带进任何项目。</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#playground">进入实验室 <span>↓</span></a>
+            <a class="button button-quiet" href="#snippet">查看实现 <span>↘</span></a>
+          </div>
+          <div class="hero-footnote"><span>01</span><span>确定性随机 · 无依赖 · 可复制</span></div>
+        </div>
+
+        <div class="hero-orb reveal reveal-delay-1" aria-hidden="true">
+          <div class="orb-glow"></div>
+          <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+          <div class="orb-core"><span></span><span></span><span></span></div>
+          <div class="orb-caption">DRIFT<br /><span>FIELD</span></div>
+        </div>
+      </section>
+
+      <section class="ticker" aria-label="效果特点">
+        <div class="ticker-track"><span>FLOAT WITH INTENTION</span><b>✳</b><span>FLOAT WITH INTENTION</span><b>✳</b><span>FLOAT WITH INTENTION</span><b>✳</b><span>FLOAT WITH INTENTION</span><b>✳</b></div>
+      </section>
+
+      <section id="playground" class="playground-section section-shell">
+        <div class="section-heading reveal"><div><p class="eyebrow">02 / PLAYGROUND</p><h2>调一朵属于你的<br /><em>粒子云。</em></h2></div><p class="section-note">拖动鼠标靠近画布，观察粒子回应。<br />所有参数都会即时写入右侧代码。</p></div>
+
+        <div class="lab-layout">
+          <div class="canvas-card reveal">
+            <div class="canvas-header"><span><i class="live-dot"></i> LIVE PREVIEW</span><span id="canvasSize">1200 × 680</span></div>
+            <canvas id="particleCanvas" aria-label="浮游粒子实时预览"></canvas>
+            <div class="canvas-overlay"><span>MOVE YOUR CURSOR</span><span id="particleCount">00,000 PARTICLES</span></div>
+          </div>
+          <aside class="controls-card reveal reveal-delay-1" aria-label="粒子参数控制">
+            <div class="controls-top"><span class="eyebrow">CONFIGURATION</span><button id="randomize" class="icon-button" title="随机一组参数">⤨</button></div>
+            <div class="preset-row"><button class="preset active" data-preset="midnight">MIDNIGHT</button><button class="preset" data-preset="milk">MILK</button><button class="preset" data-preset="signal">SIGNAL</button></div>
+            <div class="control-group"><div class="control-label"><label for="density">密度</label><output id="densityValue">68%</output></div><input id="density" type="range" min="20" max="100" value="68" /></div>
+            <div class="control-group"><div class="control-label"><label for="speed">呼吸速度</label><output id="speedValue">42%</output></div><input id="speed" type="range" min="0" max="100" value="42" /></div>
+            <div class="control-group"><div class="control-label"><label for="size">颗粒尺寸</label><output id="sizeValue">3 px</output></div><input id="size" type="range" min="1" max="7" value="3" /></div>
+            <div class="control-group"><div class="control-label"><label for="glow">光晕</label><output id="glowValue">24%</output></div><input id="glow" type="range" min="0" max="70" value="24" /></div>
+            <div class="color-row"><label for="particleColor">粒子颜色</label><div class="color-input"><input id="particleColor" type="color" value="#f5f0e8" /><span id="colorValue">#F5F0E8</span></div></div>
+            <div class="control-divider"></div>
+            <div class="toggle-row"><div><strong>指针排斥</strong><span>让光点对鼠标产生微小回弹</span></div><button id="pointerToggle" class="switch on" aria-label="切换指针排斥"><i></i></button></div>
+            <div class="toggle-row"><div><strong>低性能模式</strong><span>减少采样，适合移动端</span></div><button id="perfToggle" class="switch" aria-label="切换低性能模式"><i></i></button></div>
+            <button id="downloadConfig" class="button button-outline full-width">导出当前配置 <span>↓</span></button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="presets-section section-shell">
+        <div class="section-heading reveal"><div><p class="eyebrow">03 / STARTING POINTS</p><h2>三种气质，<em>一行代码。</em></h2></div><p class="section-note">从预设开始，改出你的品牌语言。<br />预设只是起点，不是边界。</p></div>
+        <div class="preset-grid">
+          <button class="preset-card preset-card-dark reveal" data-preset-card="midnight"><div class="mini-canvas" data-mini="midnight"></div><div class="preset-info"><span>01 · QUIET DEPTH</span><strong>Midnight / 深夜</strong><i>使用预设 ↗</i></div></button>
+          <button class="preset-card preset-card-light reveal reveal-delay-1" data-preset-card="milk"><div class="mini-canvas" data-mini="milk"></div><div class="preset-info"><span>02 · SOFT AIR</span><strong>Milk / 乳白</strong><i>使用预设 ↗</i></div></button>
+          <button class="preset-card preset-card-signal reveal reveal-delay-2" data-preset-card="signal"><div class="mini-canvas" data-mini="signal"></div><div class="preset-info"><span>03 · DIGITAL HEAT</span><strong>Signal / 信号</strong><i>使用预设 ↗</i></div></button>
+        </div>
+      </section>
+
+      <section id="snippet" class="snippet-section section-shell">
+        <div class="snippet-head reveal"><div><p class="eyebrow">04 / TAKE IT WITH YOU</p><h2>复制，粘贴，<br /><em>开始漂浮。</em></h2></div><button id="copyAll" class="button button-primary">复制完整实现 <span>⧉</span></button></div>
+        <div class="snippet-layout">
+          <div class="code-window reveal"><div class="code-top"><span><i></i><i></i><i></i></span><small>driftfield.js</small><span class="code-lang">JAVASCRIPT</span></div><pre><code id="codeOutput"></code></pre></div>
+          <div class="snippet-notes reveal reveal-delay-1"><div class="note"><span>01</span><p><strong>Canvas 原生绘制</strong><br />零依赖，适合直接嵌入现有项目。</p></div><div class="note"><span>02</span><p><strong>确定性随机种子</strong><br />每次渲染都保持同样的颗粒性格。</p></div><div class="note"><span>03</span><p><strong>渐进增强</strong><br />关闭动画或启用低性能模式也能保持层次。</p></div><a class="github-cta" href="https://github.com/trynewthin/oh-my-tab" target="_blank" rel="noreferrer"><span>想深入看看原项目</span><strong>oh-my-tab ↗</strong></a></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer section-shell"><span>DRIFTFIELD / 2026</span><span>MADE FOR QUIET INTERFACES</span><span>↑ BACK TO TOP</span></footer>
+    <script src="app.js"></script>
+  </body>
+</html>
