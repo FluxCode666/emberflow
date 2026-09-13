@@ -84,19 +84,22 @@ function mountDriftfield(canvas, options = {}) {
       const noise = flowingNoiseX(config.seed, fieldX + 11, fieldY + 7);
       const tailNoise = flowingNoiseX(config.seed + 97, fieldX + 7, fieldY + 31);
       const tailDrift = flowingNoiseX(config.seed + 503, p.x * 0.16 + time / 1000 * 0.48, p.y * 0.16 + 23);
-      const tailSignal = Math.max(0, Math.min(1, tailNoise + (tailDrift - 0.5) * 0.26));
       const tailVariance = Math.max(3, Math.min(20, config.tailVariance));
-      const tailLimit = 32 - tailVariance + flowingNoiseX(config.seed + 211, p.x * 0.18 + time / 1000 * 0.18, p.y * 0.18 + time / 1000 * 0.14 + 41) * tailVariance;
+      // Keep one smooth, animated tail envelope per row so the longest row shifts naturally.
+      const rowTail = flowingNoiseX(config.seed + 211, p.y * 0.65 + time / 1000 * 0.32, 41);
+      const tailSignal = Math.max(0, Math.min(1, tailNoise + (tailDrift - 0.5) * 0.26 + (rowTail - 0.5) * 0.16));
+      const tailLimit = 32 - tailVariance + rowTail * tailVariance;
       if (distance < -tailLimit) continue;
+      const tailProgress = Math.max(0, Math.min(1, (-distance - 8) / Math.max(1, tailLimit - 8)));
       const tone = Math.min(1, Math.max(0, (noise - 0.16) / 0.72));
       const tailTone = Math.min(1, Math.max(0, (tailSignal - 0.18) / 0.82));
       const hotEmber = distance < 0 && distance >= -8 && noise > 0.52;
-      const trail = distance < -8 && tailSignal > 0.52 + (-distance / tailLimit) * 0.18;
+      const trail = distance < -8 && tailSignal > 0.3 + tailProgress * 0.34;
       if (!(distance >= 0 ? distance > 2 || noise > 0.18 : hotEmber || trail)) continue;
       const coverage = hotEmber ? Math.min(1, (noise - 0.52) / 0.48)
-        : trail ? Math.max(0.2, (distance + tailLimit) / (tailLimit - 8)) : Math.min(1, Math.max(0, distance + 0.5));
+        : trail ? Math.max(0.24, (distance + tailLimit) / (tailLimit - 8)) : Math.min(1, Math.max(0, distance + 0.5));
       const fade = hotEmber || trail ? 1 : Math.min(1, 0.2 + Math.max(0, distance) / 18 * 0.8);
-      let alpha = (hotEmber ? 0.28 + tone * 0.62 : trail ? 0.025 + tailTone * 0.3
+      let alpha = (hotEmber ? 0.28 + tone * 0.62 : trail ? 0.035 + tailTone * 0.34
         : (0.07 + p.x / Math.max(1, columns - 1) * 0.34 + tone * 0.24) * fade) * coverage;
       const px = left + p.x * config.gap + 4, py = p.y * config.gap + 4;
       let ox = 0, oy = 0;
