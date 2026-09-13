@@ -107,6 +107,7 @@ function mountDriftfield(canvas, options = {}) {
       const fade = hotEmber || trail ? 1 : Math.min(1, 0.2 + Math.max(0, distance) / 18 * 0.8);
       let alpha = (hotEmber ? 0.28 + tone * 0.62 : trail ? 0.035 + tailTone * 0.34
         : (0.07 + p.x / Math.max(1, columns - 1) * 0.34 + tone * 0.24) * fade) * coverage;
+      if (gapRate === 0) alpha = Math.max(alpha, 0.16 * (distance < 0 ? naturalTailCoverage : 1));
       const px = left + p.x * config.gap + 4, py = p.y * config.gap + 4;
       let ox = 0, oy = 0;
       if (config.pointer && pointer.active) {
