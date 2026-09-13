@@ -74,3 +74,13 @@ function mountHeroDotfield(el) {
   el.addEventListener('pointermove',e=>{const r=el.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top;mouse.active=true});el.addEventListener('pointerleave',()=>mouse.active=false);new ResizeObserver(resizeHero).observe(el);resizeHero();requestAnimationFrame(paintHero);
 }
 mountHeroDotfield(heroCanvas);
+
+// Tab-card texture: the reference project's particles live on the right edge of a label card.
+function mountTabTexture(el, seed) {
+  const cx = el.getContext('2d');
+  let w=0,h=0,dpr=1,cols=0,rows=0,items=[],pointer={x:-9999,y:-9999,active:false},last=0;
+  const resizeTab=()=>{const r=el.getBoundingClientRect();w=r.width;h=r.height;dpr=Math.min(1.5,devicePixelRatio||1);el.width=w*dpr;el.height=h*dpr;cx.setTransform(dpr,0,0,dpr,0,0);const gap=9;cols=Math.ceil(w/gap)+1;rows=Math.ceil(h/gap)+1;items=[];for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const edge=cols*(.04+hash(seed,401,Math.floor(y/5))*.24);const edgeDensity=Math.min(1,Math.max(.08,(x-edge+2)/4));const scatter=hash(seed,x,y);if(scatter>.78*edgeDensity)continue;items.push({x:x*gap+4,y:y*gap+4,scatter,edgeDensity,phase:hash(seed,x+131,y+211)*Math.PI*2,period:3.8+hash(seed,x+47,y+73)*4.4,depth:.65+hash(seed,x+307,y+419)*.35})}};
+  const paintTab=(time)=>{if(time-last<33){requestAnimationFrame(paintTab);return}last=time;cx.clearRect(0,0,w,h);const rgb=hexRgb(state.color);const sec=time/1000;for(const p of items){const breath=(1-Math.cos(sec*Math.PI*2/p.period+p.phase))/2;let ox=0,oy=0,boost=0;const dist=Math.hypot(p.x-pointer.x,p.y-pointer.y);if(state.pointer&&pointer.active&&dist<100){const force=(1-dist/100)**2*8;ox=(p.x-pointer.x)/(dist||1)*force;oy=(p.y-pointer.y)/(dist||1)*force;boost=(1-dist/100)**2*.34}const alpha=(.18+.4*(p.x/Math.max(w,1)))*(0.9+(breath-.5)*.7*p.depth*(state.speed/100))+boost;const size=3.2+(p.scatter/.78)*1.8+boost*3;cx.fillStyle=`rgba(${rgb.join(',')},${Math.max(.03,Math.min(.9,alpha))})`;cx.fillRect(p.x+ox-size/2,p.y+oy-size/2,size,size)}requestAnimationFrame(paintTab)};
+  el.addEventListener('pointermove',e=>{const r=el.getBoundingClientRect();pointer.x=e.clientX-r.left;pointer.y=e.clientY-r.top;pointer.active=true});el.addEventListener('pointerleave',()=>pointer.active=false);new ResizeObserver(resizeTab).observe(el);resizeTab();requestAnimationFrame(paintTab);
+}
+document.querySelectorAll('[data-tab-texture]').forEach((el,index)=>mountTabTexture(el,23+index*71));
