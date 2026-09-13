@@ -60,11 +60,9 @@ function mountDriftfield(canvas, options = {}) {
     const amplitude = Math.max(0.2, config.speed);
     const gridWidth = columns * config.gap;
     const flowOffset = (time / 1000 * (6 + config.speed * 10)) % gridWidth;
-    const flowCells = Math.floor(flowOffset / config.gap);
     const left = width - (gridWidth - 1);
     const recession = 1 - config.density;
     for (const p of particles) {
-      const sampleX = (p.x + flowCells) % columns;
       const edgeNoise = flowingNoise(config.seed, 0, p.y + phase * 0.45);
       const baseEdge = columns * (0.385 + (edgeNoise - 0.5) * 0.33 * amplitude);
       const wave = Math.sin(p.y * 0.72 + phase * 2.1 + config.seed * 0.01) * 2.4
@@ -73,8 +71,8 @@ function mountDriftfield(canvas, options = {}) {
         + recession * Math.sin(p.y * 0.7 + phase) * 2 + wave;
       const distance = p.x - edge;
       if (distance < -32) continue;
-      const noise = flowingNoise(config.seed, sampleX + 11, p.y + 7 + phase * 1.15);
-      const tailNoise = flowingNoise(config.seed + 97, sampleX + 7, p.y + 31 + phase * 1.8);
+      const noise = flowingNoise(config.seed, p.x + 11, p.y + 7 + phase * 1.15);
+      const tailNoise = flowingNoise(config.seed + 97, p.x + 7, p.y + 31 + phase * 1.8);
       const hotEmber = distance < 0 && distance >= -8 && noise > 0.52;
       const trail = distance < -8 && tailNoise > 0.52 + (-distance / 32) * 0.18;
       if (!(distance >= 0 ? distance > 2 || noise > 0.18 : hotEmber || trail)) continue;
@@ -82,8 +80,8 @@ function mountDriftfield(canvas, options = {}) {
         : trail ? Math.max(0.2, (distance + 32) / 24) : Math.min(1, Math.max(0, distance + 0.5));
       const fade = hotEmber || trail ? 1 : Math.min(1, 0.2 + Math.max(0, distance) / 18 * 0.8);
       let alpha = (hotEmber ? 0.2 + (noise - 0.52) * 0.62 : trail ? 0.06 + tailNoise * 0.16
-        : (0.12 + sampleX / Math.max(1, columns - 1) * 0.24 + noise * 0.12) * fade) * coverage;
-      const px = left + p.x * config.gap + 4, py = p.y * config.gap + 4;
+        : (0.12 + p.x / Math.max(1, columns - 1) * 0.24 + noise * 0.12) * fade) * coverage;
+      const px = left + ((p.x * config.gap - flowOffset + gridWidth) % gridWidth) + 4, py = p.y * config.gap + 4;
       let ox = 0, oy = 0;
       if (config.pointer && pointer.active) {
         const distanceToPointer = Math.hypot(px - pointer.x, py - pointer.y);
