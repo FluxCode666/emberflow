@@ -3,6 +3,7 @@ const ctx = canvas.getContext('2d');
 const state = { density: 68, speed: 42, size: 3, height: 600, glow: 24, color: '#f5f0e8', pointer: true, lowPerf: false, seed: 23, preset: 'midnight' };
 const presets = { midnight:{density:68,speed:42,size:3,glow:24,color:'#f5f0e8',bg:'#131516'}, milk:{density:57,speed:30,size:3,glow:12,color:'#242628',bg:'#eeebe3'}, signal:{density:78,speed:66,size:2,glow:48,color:'#ff6741',bg:'#17191a'} };
 let particles=[], width=0,height=0,dpr=1,pointer={x:-9999,y:-9999,active:false}, raf;
+let activeCodeLanguage='javascript', codeVariants={};
 const $ = id => document.getElementById(id);
 function hash(seed,x,y){const n=Math.sin(seed*.0001+x*127.1+y*311.7)*43758.5453;return n-Math.floor(n)}
 function createParticleSample(seed,x,y,columns){
@@ -77,10 +78,46 @@ function mountDriftfield(canvas, options = {}) {
   new ResizeObserver(build).observe(canvas); build(); requestAnimationFrame(paint);
 }
 
-mountDriftfield(document.querySelector('#particle-canvas'));`; $('codeOutput').innerHTML=escapeHtml(c).replace(/(const|function|return|forEach|new)/g,'<span class="key">$1</span>').replace(/(randomAt|flowingNoise|burningCell|mountDriftfield|paint|fillRect|requestAnimationFrame)/g,'<span class="fn">$1</span>').replace(/(0\.\d+|\d+\.\d+)/g,'<span class="num">$1</span>')}
+mountDriftfield(document.querySelector('#particle-canvas'));`; $('codeOutput').innerHTML=highlightCode(c);codeVariants=buildCodeVariants(c);renderModalCode()}
+function highlightCode(source){return escapeHtml(source).replace(/(const|function|return|forEach|new|import|export|from)/g,'<span class=\"key\">$1</span>').replace(/(randomAt|flowingNoise|burningCell|mountDriftfield|paint|fillRect|requestAnimationFrame|useEffect|useRef|onMounted|onBeforeUnmount)/g,'<span class=\"fn\">$1</span>').replace(/(0\.\d+|\d+\.\d+)/g,'<span class=\"num\">$1</span>')}
+function buildCodeVariants(source){const options=`{ color: '${state.color}', density: ${(state.density/100).toFixed(2)}, speed: ${(state.speed/42).toFixed(2)}, size: ${state.size/3}, height: ${state.height}, glow: ${state.glow}, pointer: ${state.pointer}, lowPerf: ${state.lowPerf} }`;const typed=source.replace("mountDriftfield(document.querySelector('#particle-canvas'));","export { mountDriftfield };");return {javascript:source,html:`<!-- Paste into any HTML page -->
+<canvas id=\"particle-canvas\" style=\"width:100%;height:${state.height}px\"></canvas>
+<script>
+${source}
+</script>`,typescript:`// driftfield.ts · JavaScript-compatible TypeScript
+export type DriftfieldOptions = Partial<{
+  color: string; density: number; speed: number; size: number;
+  height: number; glow: number; pointer: boolean; lowPerf: boolean;
+}>;
+
+${typed}`,react:`// Driftfield.jsx · React integration
+import { useEffect, useRef } from 'react';
+import { mountDriftfield } from './driftfield.js';
+
+export default function Driftfield(){
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const instance = mountDriftfield(canvasRef.current, ${options});
+    return () => instance?.destroy();
+  }, []);
+  return <canvas ref={canvasRef} style={{ width: '100%', height: '${state.height}px' }} />;
+}`,vue:`<!-- Driftfield.vue · Vue 3 integration -->
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { mountDriftfield } from './driftfield.js';
+
+const canvas = ref(null);
+let instance;
+onMounted(() => { instance = mountDriftfield(canvas.value, ${options}); });
+onBeforeUnmount(() => instance?.destroy());
+</script>
+
+<template><canvas ref=\"canvas\" style=\"width:100%;height:${state.height}px\"></canvas></template>`}}
+function renderModalCode(){if(!$('codeModalOutput'))return;const source=codeVariants[activeCodeLanguage]||codeVariants.javascript||'';$('codeModalOutput').innerHTML=highlightCode(source);document.querySelectorAll('[data-code-language]').forEach(tab=>{const active=tab.dataset.codeLanguage===activeCodeLanguage;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active))})}
 function escapeHtml(s){return s.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
 function copy(text,btn){navigator.clipboard?.writeText(text);const original=btn.innerHTML;btn.innerHTML='已复制 ✓';setTimeout(()=>btn.innerHTML=original,1400)}
-['density','speed','size','height','glow'].forEach(id=>$(id).addEventListener('input',e=>{state[id]=+e.target.value;apply()}));$('particleColor').addEventListener('input',e=>{state.color=e.target.value;apply()});$('pointerToggle').addEventListener('click',()=>{state.pointer=!state.pointer;$('pointerToggle').classList.toggle('on',state.pointer);updateCode()});$('perfToggle').addEventListener('click',()=>{state.lowPerf=!state.lowPerf;$('perfToggle').classList.toggle('on',state.lowPerf);build();updateCode()});document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{state.preset=b.dataset.preset;Object.assign(state,presets[state.preset]);apply()}));document.querySelectorAll('[data-preset-card]').forEach(b=>b.addEventListener('click',()=>{state.preset=b.dataset.presetCard;Object.assign(state,presets[state.preset]);apply();location.hash='playground'}));$('randomize').addEventListener('click',()=>{state.seed=Math.floor(Math.random()*10000);state.density=20+Math.floor(Math.random()*80);state.speed=Math.floor(Math.random()*80);state.size=1+Math.floor(Math.random()*6);state.glow=Math.floor(Math.random()*55);apply()});$('copyAll').addEventListener('click',()=>copy(document.getElementById('codeOutput').textContent,$('copyAll')));$('downloadConfig').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='driftfield-config.json';a.click();URL.revokeObjectURL(a.href)});canvas.addEventListener('pointermove',e=>{const r=canvas.getBoundingClientRect();pointer.x=e.clientX-r.left;pointer.y=e.clientY-r.top;pointer.active=true});canvas.addEventListener('pointerleave',()=>pointer.active=false);window.addEventListener('resize',resize);apply();requestAnimationFrame(draw);
+['density','speed','size','height','glow'].forEach(id=>$(id).addEventListener('input',e=>{state[id]=+e.target.value;apply()}));$('particleColor').addEventListener('input',e=>{state.color=e.target.value;apply()});$('pointerToggle').addEventListener('click',()=>{state.pointer=!state.pointer;$('pointerToggle').classList.toggle('on',state.pointer);updateCode()});$('perfToggle').addEventListener('click',()=>{state.lowPerf=!state.lowPerf;$('perfToggle').classList.toggle('on',state.lowPerf);build();updateCode()});document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{state.preset=b.dataset.preset;Object.assign(state,presets[state.preset]);apply()}));document.querySelectorAll('[data-preset-card]').forEach(b=>b.addEventListener('click',()=>{state.preset=b.dataset.presetCard;Object.assign(state,presets[state.preset]);apply();location.hash='playground'}));$('randomize').addEventListener('click',()=>{state.seed=Math.floor(Math.random()*10000);state.density=20+Math.floor(Math.random()*80);state.speed=Math.floor(Math.random()*80);state.size=1+Math.floor(Math.random()*6);state.glow=Math.floor(Math.random()*55);apply()});$('copyAll').addEventListener('click',()=>copy(document.getElementById('codeOutput').textContent,$('copyAll')));$('viewCode').addEventListener('click',()=>{activeCodeLanguage='javascript';renderModalCode();$('codeModal').classList.add('open');$('codeModal').setAttribute('aria-hidden','false');document.body.classList.add('modal-open');$('closeCode').focus()});const closeCode=()=>{$('codeModal').classList.remove('open');$('codeModal').setAttribute('aria-hidden','true');document.body.classList.remove('modal-open');$('viewCode').focus()};$('closeCode').addEventListener('click',closeCode);document.querySelectorAll('[data-close-code]').forEach(el=>el.addEventListener('click',closeCode));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('codeModal').classList.contains('open'))closeCode()});$('copyModalCode').addEventListener('click',()=>copy($('codeModalOutput').textContent,$('copyModalCode')));document.querySelectorAll('[data-code-language]').forEach(tab=>tab.addEventListener('click',()=>{activeCodeLanguage=tab.dataset.codeLanguage;renderModalCode()}));$('downloadConfig').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='driftfield-config.json';a.click();URL.revokeObjectURL(a.href)});canvas.addEventListener('pointermove',e=>{const r=canvas.getBoundingClientRect();pointer.x=e.clientX-r.left;pointer.y=e.clientY-r.top;pointer.active=true});canvas.addEventListener('pointerleave',()=>pointer.active=false);window.addEventListener('resize',resize);apply();requestAnimationFrame(draw);
 function makeMini(el,preset){const c=document.createElement('canvas');c.width=500;c.height=260;c.style.width='100%';c.style.height='100%';el.append(c);const x=c.getContext('2d'),p=presets[preset];x.fillStyle=p.bg;x.fillRect(0,0,c.width,c.height);const rgb=hexRgb(p.color);for(let y=0;y<29;y++)for(let xx=0;xx<56;xx++){if(hash(23,xx,y)>.6)continue;const a=.15+.55*(xx/56);x.fillStyle=`rgba(${rgb.join(',')},${a})`;const s=1.2+hash(23,xx+3,y+5)*2.5;x.fillRect(xx*9+4,y*9+5,s,s)}}document.querySelectorAll('[data-mini]').forEach(el=>makeMini(el,el.dataset.mini));
 
 // A compact dot-matrix renderer for the reference-like wordmark preview.

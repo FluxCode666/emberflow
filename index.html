@@ -69,6 +69,7 @@
             <div class="control-divider"></div>
             <div class="toggle-row"><div><strong>指针排斥</strong><span>让光点对鼠标产生微小回弹</span></div><button id="pointerToggle" class="switch on" aria-label="切换指针排斥"><i></i></button></div>
             <div class="toggle-row"><div><strong>低性能模式</strong><span>减少采样，适合移动端</span></div><button id="perfToggle" class="switch" aria-label="切换低性能模式"><i></i></button></div>
+            <button id="viewCode" class="button button-outline full-width">查看代码 <span>↗</span></button>
             <button id="downloadConfig" class="button button-outline full-width">导出当前配置 <span>↓</span></button>
           </aside>
         </div>
@@ -109,6 +110,14 @@
     </main>
 
     <footer class="footer section-shell"><span>DRIFTFIELD / 2026</span><span>MADE FOR QUIET INTERFACES</span><span>↑ BACK TO TOP</span></footer>
+    <div id="codeModal" class="code-modal" aria-hidden="true">
+      <div class="code-modal-backdrop" data-close-code></div>
+      <section class="code-modal-panel" role="dialog" aria-modal="true" aria-labelledby="codeModalTitle">
+        <div class="code-modal-head"><div><p class="eyebrow">GENERATED IMPLEMENTATION</p><h2 id="codeModalTitle">当前粒子代码</h2></div><button id="closeCode" class="code-modal-close" aria-label="关闭代码弹窗">×</button></div>
+        <div class="code-modal-toolbar"><div class="code-language-tabs" role="tablist" aria-label="代码实现语言"><button class="code-tab active" role="tab" aria-selected="true" data-code-language="javascript">JavaScript</button><button class="code-tab" role="tab" aria-selected="false" data-code-language="html">HTML</button><button class="code-tab" role="tab" aria-selected="false" data-code-language="typescript">TypeScript</button><button class="code-tab" role="tab" aria-selected="false" data-code-language="react">React</button><button class="code-tab" role="tab" aria-selected="false" data-code-language="vue">Vue 3</button></div><button id="copyModalCode" class="button button-primary">复制代码 <span>⧉</span></button></div>
+        <pre class="code-modal-output"><code id="codeModalOutput"></code></pre>
+      </section>
+    </div>
     <script src="app.js"></script>
   </body>
 </html>

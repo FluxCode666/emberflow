@@ -12,7 +12,9 @@ python3 -m http.server 4173
 
 ## 可复用方式
 
-页面里的「复制完整实现」会生成一个 `mountDriftfield(canvas, options)` 示例，直接复制到项目中即可使用：
+配置面板里的「查看代码」会打开代码弹窗，支持 JavaScript、HTML、TypeScript、React 和 Vue 3 五种接入方式；所有版本都会读取当前配置的颜色、密度、速度、尺寸和高度。 「复制完整实现」仍会复制原生 JavaScript 版本，适合直接嵌入项目：
+
+React 和 Vue 3 版本默认从同目录的 `driftfield.js` 引入共享引擎；它返回 `destroy()` 清理句柄，组件卸载时会停止动画并移除监听器。
 
 ```html
 <canvas id="particle-canvas" style="width:100%;height:320px"></canvas>
@@ -33,3 +35,4 @@ python3 -m http.server 4173
 - `index.html`：展示页结构、实时 playground、预设卡片与代码区
 - `styles.css`：编辑部式排版、暗色粒子画布、响应式布局与动效
 - `app.js`：确定性随机点阵、呼吸动画、指针交互、代码生成与配置导出
+- `driftfield.js`：可被其他项目直接引入的共享 Canvas 粒子引擎
