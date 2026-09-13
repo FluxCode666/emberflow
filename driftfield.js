@@ -48,7 +48,7 @@ function mountDriftfield(canvas, options = {}) {
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     columns = Math.ceil(width / config.gap) + 1;
     const rows = Math.ceil(height / config.gap) + 1;
-    const sampleRate = Math.min(1, (config.lowPerf ? 2200 : 4200) / (columns * rows));
+    const sampleRate = config.lowPerf ? Math.min(1, 2200 / (columns * rows)) : 1;
     particles = [];
     for (let y = 0; y < rows; y++) for (let x = 0; x < columns; x++) {
       if (sampleRate < 1 && sampleAt(config.seed + 99, x, y) > sampleRate) continue;
