@@ -64,21 +64,24 @@ function mountDriftfield(canvas, options = {}) {
     ctx.clearRect(0, 0, width, height);
     const amplitude = Math.max(0.2, config.speed);
     const gridWidth = columns * config.gap;
-    const flowOffset = (time / 1000 * (6 + config.speed * 10)) % gridWidth;
+    // Unbounded texture coordinates avoid a seam when the canvas width is crossed.
+    const flowOffset = time / 1000 * (6 + config.speed * 10);
     const left = width - (gridWidth - 1);
     const recession = 1 - config.density;
     for (const p of particles) {
-      const sampleX = (p.x + flowOffset / config.gap) % columns;
-      const edgeNoise = flowingNoise(config.seed, 0, p.y);
+      const sampleX = p.x + flowOffset / config.gap;
+      const fieldY = p.y * 0.42;
+      const fieldX = sampleX * 0.42;
+      const edgeNoise = flowingNoise(config.seed, 0, fieldY);
       const baseEdge = columns * (0.385 + (edgeNoise - 0.5) * 0.33 * amplitude);
-      const wave = Math.sin(p.y * 0.72 + config.seed * 0.01) * 2.4
-        + (flowingNoise(config.seed + 19, 0, p.y) - 0.5) * 10;
+      const wave = Math.sin(p.y * 0.34 + config.seed * 0.01) * 2.4
+        + (flowingNoise(config.seed + 19, 0, fieldY) - 0.5) * 10;
       const edge = baseEdge + recession * (columns + 5 - baseEdge)
-        + recession * Math.sin(p.y * 0.7) * 2 + wave;
+        + recession * Math.sin(fieldY * 0.7) * 2 + wave;
       const distance = p.x - edge;
       if (distance < -32) continue;
-      const noise = flowingNoiseX(config.seed, sampleX + 11, p.y + 7);
-      const tailNoise = flowingNoiseX(config.seed + 97, sampleX + 7, p.y + 31);
+      const noise = flowingNoiseX(config.seed, fieldX + 11, fieldY + 7);
+      const tailNoise = flowingNoiseX(config.seed + 97, fieldX + 7, fieldY + 31);
       const hotEmber = distance < 0 && distance >= -8 && noise > 0.52;
       const trail = distance < -8 && tailNoise > 0.52 + (-distance / 32) * 0.18;
       if (!(distance >= 0 ? distance > 2 || noise > 0.18 : hotEmber || trail)) continue;
