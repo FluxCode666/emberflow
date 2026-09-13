@@ -21,14 +21,15 @@
 npx skills add FluxCode666/emberflow
 ```
 
-也可以使用仓库自带的 npm 安装器，将技能复制到 Codex 用户目录：
+仓库也提供了一个无依赖的本地安装器，直接从 GitHub 执行即可：
 
 ```bash
-npx @fluxcode666/emberflow install
+# 安装到 Codex 用户目录
+npx --yes github:FluxCode666/emberflow install
 # 当前项目安装到 .agents/skills/
-npx @fluxcode666/emberflow install --scope project
+npx --yes github:FluxCode666/emberflow install --scope project
 # 查看安装器帮助
-npx @fluxcode666/emberflow help
+npx --yes github:FluxCode666/emberflow help
 ```
 
 安装完成后，向 Agent 说明“使用 Emberflow UI skill”，或直接使用 `$emberflow-ui`。技能会指导 Agent 复用粒子引擎、保持色块向左流动、生成 HTML/React/Vue 接入，并在视觉改动后执行浏览器检查。

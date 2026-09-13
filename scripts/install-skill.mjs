@@ -16,7 +16,7 @@ const defaultTarget = path.join(codexHome, 'skills', 'emberflow-ui');
 const target = flag('--target') || (flag('--scope') === 'project' ? path.join(process.cwd(), '.agents', 'skills', 'emberflow-ui') : defaultTarget);
 
 if (command === 'help' || command === '--help' || command === '-h') {
-  console.log(`Emberflow Skill installer\n\nUsage:\n  npx @fluxcode666/emberflow install                 Install for the current user\n  npx @fluxcode666/emberflow install --scope project Install into .agents/skills\n  npx @fluxcode666/emberflow install --target PATH   Install into an exact directory\n  npx @fluxcode666/emberflow path                   Print the skill source path`);
+  console.log(`Emberflow Skill installer\n\nUsage:\n  npx --yes github:FluxCode666/emberflow install                 Install for the current user\n  npx --yes github:FluxCode666/emberflow install --scope project Install into .agents/skills\n  npx --yes github:FluxCode666/emberflow install --target PATH   Install into an exact directory\n  npx --yes github:FluxCode666/emberflow path                   Print the skill source path`);
   process.exit(0);
 }
 if (command === 'path') {
