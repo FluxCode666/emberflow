@@ -5,8 +5,8 @@ function mountDriftfield(canvas, options = {}) {
   const ctx = context;
   const config = {
     color: '#f5f0e8', background: '#131516', seed: 23,
-    density: 0.68, speed: 1, size: 1, height: 600,
-    glow: 24, pointer: true, lowPerf: false, gap: 9, ...options
+    density: 0.68, speed: 1, size: 1, height: 320,
+    glow: 24, pointerStrength: 30, pointer: true, lowPerf: false, gap: 9, ...options
   };
   let width = 0, height = 0, columns = 0;
   let frame = 0, lastFrame = 0, destroyed = false;
@@ -84,10 +84,10 @@ function mountDriftfield(canvas, options = {}) {
       if (config.pointer && pointer.active) {
         const distanceToPointer = Math.hypot(px - pointer.x, py - pointer.y);
         if (distanceToPointer < 180) {
-          const force = (1 - distanceToPointer / 180) ** 2 * 8;
+          const force = (1 - distanceToPointer / 180) ** 2 * 8 * (config.pointerStrength / 30);
           ox = (px - pointer.x) / (distanceToPointer || 1) * force;
           oy = (py - pointer.y) / (distanceToPointer || 1) * force;
-          alpha = Math.min(0.96, alpha + (1 - distanceToPointer / 180) ** 2 * 0.34);
+          alpha = Math.min(0.96, alpha + (1 - distanceToPointer / 180) ** 2 * 0.34 * (config.pointerStrength / 30));
         }
       }
       const size = (hotEmber ? 3.4 + noise * 2.4 : trail ? 2.2 + tailNoise * 2.2

@@ -23,12 +23,14 @@ React 和 Vue 3 版本默认从同目录的 `driftfield.js` 引入共享引擎�
     color: '#f5f0e8',
     density: 0.68,
     speed: 0.42,
-    size: 3
+    size: 3,
+    height: 320,
+    pointerStrength: 30
   })
 </script>
 ```
 
-可调参数：`color`、`density`、`speed`、`size`、`gap`。展示页还提供 Midnight、Milk、Signal 三组预设、指针排斥、低性能模式和 JSON 配置导出。
+可调参数：`color`、`density`、`speed`、`size`、`height`（50–500px）、`pointerStrength`（0–100%）和 `gap`。展示页还提供 Midnight、Milk、Signal 三组预设、指针排斥、低性能模式和 JSON 配置导出。
 
 ## 文件
 
