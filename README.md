@@ -1,6 +1,6 @@
 # Driftfield · 浮游粒子实验室
 
-从 [oh-my-tab](https://github.com/trynewthin/oh-my-tab) 的粒子点阵视觉抽离出的独立效果展示页。整个页面是零构建依赖的原生 HTML / CSS / Canvas，可以直接部署到静态托管，也可以把粒子画布嵌入其他项目。
+从 [oh-my-tab](https://github.com/trynewthin/oh-my-tab) 的粒子点阵视觉抽离出的独立效果展示页。整个页面是零构建依赖的原生 HTML / CSS / Canvas，可以直接部署到静态托管，也可以把粒子画布嵌入其他项目。粒子采样算法按参考项目的 `particle-texture.ts` 迁移，保留确定性随机、边缘密度、独立呼吸周期和强度计算。
 
 ## 本地预览
 
