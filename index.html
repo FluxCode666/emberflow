@@ -21,7 +21,6 @@
       <div class="top-meta">
         <span class="status-dot"></span><span>CANVAS EFFECTS / 01</span>
       </div>
-      <a class="reference-link" href="https://github.com/trynewthin/oh-my-tab" target="_blank" rel="noreferrer">参考源 ↗</a>
     </header>
 
     <main id="top">
@@ -32,7 +31,7 @@
           <p class="hero-lede">从 oh-my-tab 抽离的浮游点阵。用一个轻量 Canvas，把新标签页的静谧、深度和微妙运动带进任何项目。</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#playground">进入实验室 <span>↓</span></a>
-            <a class="button button-quiet" href="#snippet">查看实现 <span>↘</span></a>
+            <a class="button button-quiet" href="#viewCode">查看实现 <span>↘</span></a>
           </div>
           <div class="hero-footnote"><span>01</span><span>确定性随机 · 无依赖 · 可复制</span></div>
         </div>
@@ -49,7 +48,7 @@
       </section>
 
       <section id="playground" class="playground-section section-shell">
-        <div class="section-heading reveal"><div><p class="eyebrow">02 / PLAYGROUND</p><h2>调一朵属于你的<br /><em>粒子云。</em></h2></div><p class="section-note">拖动鼠标靠近画布，观察粒子回应。<br />所有参数都会即时写入右侧代码。</p></div>
+        <div class="section-heading reveal"><div><p class="eyebrow">02 / PLAYGROUND</p><h2>调一朵属于你的<br /><em>粒子云。</em></h2></div><p class="section-note">拖动鼠标靠近画布，观察粒子回应。<br />调整参数后，点击「查看代码」即可复制。</p></div>
 
         <div class="lab-layout">
           <div class="canvas-card reveal">
@@ -70,8 +69,10 @@
             <div class="toggle-row"><div><strong>指针排斥</strong><span>让光点对鼠标产生微小回弹</span></div><button id="pointerToggle" class="switch" aria-label="切换指针排斥"><i></i></button></div>
             <div class="control-group"><div class="control-label"><label for="pointerStrength">指针排斥力度</label><output id="pointerStrengthValue">30%</output></div><input id="pointerStrength" type="range" min="0" max="100" value="30" /></div>
             <div class="toggle-row"><div><strong>低性能模式</strong><span>减少采样，适合移动端</span></div><button id="perfToggle" class="switch" aria-label="切换低性能模式"><i></i></button></div>
-            <button id="viewCode" class="button button-outline full-width">查看代码 <span>↗</span></button>
-            <button id="downloadConfig" class="button button-outline full-width">导出当前配置 <span>↓</span></button>
+            <div class="control-actions">
+              <button id="viewCode" class="button button-outline">查看代码 <span>↗</span></button>
+              <button id="downloadConfig" class="button button-outline">导出当前配置 <span>↓</span></button>
+            </div>
           </aside>
         </div>
       </section>
@@ -101,13 +102,6 @@
         </div>
       </section>
 
-      <section id="snippet" class="snippet-section section-shell">
-        <div class="snippet-head reveal"><div><p class="eyebrow">04 / TAKE IT WITH YOU</p><h2>复制，粘贴，<br /><em>开始漂浮。</em></h2></div><button id="copyAll" class="button button-primary">复制完整实现 <span>⧉</span></button></div>
-        <div class="snippet-layout">
-          <div class="code-window reveal"><div class="code-top"><span><i></i><i></i><i></i></span><small>driftfield.js</small><span class="code-lang">JAVASCRIPT</span></div><pre><code id="codeOutput"></code></pre></div>
-          <div class="snippet-notes reveal reveal-delay-1"><div class="note"><span>01</span><p><strong>Canvas 原生绘制</strong><br />零依赖，适合直接嵌入现有项目。</p></div><div class="note"><span>02</span><p><strong>确定性随机种子</strong><br />每次渲染都保持同样的颗粒性格。</p></div><div class="note"><span>03</span><p><strong>渐进增强</strong><br />关闭动画或启用低性能模式也能保持层次。</p></div><a class="github-cta" href="https://github.com/trynewthin/oh-my-tab" target="_blank" rel="noreferrer"><span>想深入看看原项目</span><strong>oh-my-tab ↗</strong></a></div>
-        </div>
-      </section>
     </main>
 
     <footer class="footer section-shell"><span>DRIFTFIELD / 2026</span><span>MADE FOR QUIET INTERFACES</span><span>↑ BACK TO TOP</span></footer>

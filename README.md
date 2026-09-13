@@ -1,6 +1,6 @@
 # Driftfield · 浮游粒子实验室
 
-从 [oh-my-tab](https://github.com/trynewthin/oh-my-tab) 的粒子点阵视觉抽离出的独立效果展示页。整个页面是零构建依赖的原生 HTML / CSS / Canvas，可以直接部署到静态托管，也可以把粒子画布嵌入其他项目。粒子采样算法按参考项目的 `particle-texture.ts` 迁移，保留确定性随机、边缘密度、独立呼吸周期和强度计算。
+从 oh-my-tab 的粒子点阵视觉抽离出的独立效果展示页。整个页面是零构建依赖的原生 HTML / CSS / Canvas，可以直接部署到静态托管，也可以把粒子画布嵌入其他项目。粒子采样算法按参考项目的 `particle-texture.ts` 迁移，保留确定性随机、边缘密度、独立呼吸周期和强度计算。
 
 ## 本地预览
 
@@ -12,7 +12,7 @@ python3 -m http.server 4173
 
 ## 可复用方式
 
-配置面板里的「查看代码」会打开代码弹窗，支持 JavaScript、HTML、TypeScript、React 和 Vue 3 五种接入方式；所有版本都会读取当前配置的颜色、密度、速度、尺寸和高度。 「复制完整实现」仍会复制原生 JavaScript 版本，适合直接嵌入项目：
+配置面板里的「查看代码」会打开代码弹窗，支持 JavaScript、HTML、TypeScript、React 和 Vue 3 五种接入方式；所有版本都会读取当前配置的颜色、密度、速度、尺寸和高度。 弹窗中的「复制代码」会复制当前选中的实现版本，适合直接嵌入项目。
 
 React 和 Vue 3 版本默认从同目录的 `driftfield.js` 引入共享引擎；它返回 `destroy()` 清理句柄，组件卸载时会停止动画并移除监听器。
 
