@@ -58,7 +58,9 @@ function mountDriftfield(canvas, options = {}) {
     ctx.clearRect(0, 0, width, height);
     const phase = time / 1000 * 1.5;
     const amplitude = Math.max(0.2, config.speed);
-    const left = width - (columns * config.gap - 1);
+    const gridWidth = columns * config.gap;
+    const flowOffset = (time / 1000 * (6 + config.speed * 10)) % gridWidth;
+    const left = width - (gridWidth - 1);
     const recession = 1 - config.density;
     for (const p of particles) {
       const edgeNoise = flowingNoise(config.seed, 0, p.y + phase * 0.45);
@@ -79,7 +81,7 @@ function mountDriftfield(canvas, options = {}) {
       const fade = hotEmber || trail ? 1 : Math.min(1, 0.2 + Math.max(0, distance) / 18 * 0.8);
       let alpha = (hotEmber ? 0.2 + (noise - 0.52) * 0.62 : trail ? 0.06 + tailNoise * 0.16
         : (0.12 + p.x / Math.max(1, columns - 1) * 0.24 + noise * 0.12) * fade) * coverage;
-      const px = left + p.x * config.gap + 4, py = p.y * config.gap + 4;
+      const px = left + ((p.x * config.gap - flowOffset + gridWidth) % gridWidth) + 4, py = p.y * config.gap + 4;
       let ox = 0, oy = 0;
       if (config.pointer && pointer.active) {
         const distanceToPointer = Math.hypot(px - pointer.x, py - pointer.y);
