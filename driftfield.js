@@ -82,13 +82,17 @@ function mountDriftfield(canvas, options = {}) {
       if (distance < -32) continue;
       const noise = flowingNoiseX(config.seed, fieldX + 11, fieldY + 7);
       const tailNoise = flowingNoiseX(config.seed + 97, fieldX + 7, fieldY + 31);
+      const tailDrift = flowingNoiseX(config.seed + 503, p.x * 0.16 + time / 1000 * 0.48, p.y * 0.16 + 23);
+      const tailSignal = Math.max(0, Math.min(1, tailNoise + (tailDrift - 0.5) * 0.26));
+      const tailLimit = 18 + flowingNoiseX(config.seed + 211, p.x * 0.18 + time / 1000 * 0.18, p.y * 0.18 + 41) * 14;
+      if (distance < -tailLimit) continue;
       const hotEmber = distance < 0 && distance >= -8 && noise > 0.52;
-      const trail = distance < -8 && tailNoise > 0.52 + (-distance / 32) * 0.18;
+      const trail = distance < -8 && tailSignal > 0.52 + (-distance / tailLimit) * 0.18;
       if (!(distance >= 0 ? distance > 2 || noise > 0.18 : hotEmber || trail)) continue;
       const coverage = hotEmber ? Math.min(1, (noise - 0.52) / 0.48)
-        : trail ? Math.max(0.2, (distance + 32) / 24) : Math.min(1, Math.max(0, distance + 0.5));
+        : trail ? Math.max(0.2, (distance + tailLimit) / (tailLimit - 8)) : Math.min(1, Math.max(0, distance + 0.5));
       const fade = hotEmber || trail ? 1 : Math.min(1, 0.2 + Math.max(0, distance) / 18 * 0.8);
-      let alpha = (hotEmber ? 0.2 + (noise - 0.52) * 0.62 : trail ? 0.06 + tailNoise * 0.16
+      let alpha = (hotEmber ? 0.2 + (noise - 0.52) * 0.62 : trail ? 0.06 + tailSignal * 0.16
         : (0.12 + p.x / Math.max(1, columns - 1) * 0.24 + noise * 0.12) * fade) * coverage;
       const px = left + p.x * config.gap + 4, py = p.y * config.gap + 4;
       let ox = 0, oy = 0;
@@ -101,7 +105,7 @@ function mountDriftfield(canvas, options = {}) {
           alpha = Math.min(0.96, alpha + (1 - distanceToPointer / 180) ** 2 * 0.34 * (config.pointerStrength / 30));
         }
       }
-      const size = (hotEmber ? 3.4 + noise * 2.4 : trail ? 2.2 + tailNoise * 2.2
+      const size = (hotEmber ? 3.4 + noise * 2.4 : trail ? 2.2 + tailSignal * 2.2
         : 6.6 + Math.min(1, Math.max(0, distance) / 18) * 1.4) * config.size;
       ctx.fillStyle = `rgba(${rgb},${Math.max(0.025, Math.min(0.9, alpha))})`;
       ctx.fillRect(px + ox - size / 2, py + oy - size / 2, size, size);
