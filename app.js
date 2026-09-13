@@ -18,46 +18,65 @@ let lastFrame=0;
 function draw(t){if(t-lastFrame<33){raf=requestAnimationFrame(draw);return}lastFrame=t;ctx.clearRect(0,0,width,height);const sec=t/1000;const rgb=hexRgb(state.color);let lastBucket=-1;for(const p of particles){if(!p.sample)continue;const appearance=p.sample(sec,1,state.speed/42);if(!appearance)continue;let offsetX=0,offsetY=0;const dist=Math.hypot(p.x-pointer.x,p.y-pointer.y);if(state.pointer&&pointer.active&&dist<180){const force=(1-dist/180)**2*8;offsetX=(p.x-pointer.x)/(dist||1)*force;offsetY=(p.y-pointer.y)/(dist||1)*force}const alpha=Math.max(.03,Math.min(.9,appearance.strength/100));const bucket=Math.round(alpha*12)/12;if(bucket!==lastBucket){ctx.fillStyle=`rgba(${rgb.join(',')},${bucket})`;lastBucket=bucket}const s=8*appearance.size*(state.size/3);ctx.fillRect(p.x+offsetX-s/2,p.y+offsetY-s/2,s,s)}raf=requestAnimationFrame(draw)}
 function hexRgb(hex){const v=hex.replace('#','');return [parseInt(v.slice(0,2),16),parseInt(v.slice(2,4),16),parseInt(v.slice(4,6),16)]}
 function apply(){['density','speed','size','glow'].forEach(id=>$(id).value=state[id]);$('densityValue').textContent=state.density+'%';$('speedValue').textContent=state.speed+'%';$('sizeValue').textContent=state.size+' px';$('glowValue').textContent=state.glow+'%';$('particleColor').value=state.color;$('colorValue').textContent=state.color.toUpperCase();canvas.parentElement.style.background=presets[state.preset]?.bg||'#131516';document.querySelectorAll('.preset').forEach(b=>b.classList.toggle('active',b.dataset.preset===state.preset));build();updateCode()}
-function updateCode(){const c=`function mountDriftfield(canvas, options = {}) {
-  const ctx = canvas.getContext('2d');
-  const config = { color: '${state.color}', density: ${state.density / 100}, speed: ${state.speed / 100}, size: ${state.size}, gap: 9, ...options };
-  let width, height, particles = [];
+function updateCode(){const c=`function random(seed, x, y) {
+  const value = Math.sin(seed * 0.0001 + x * 127.1 + y * 311.7) * 43758.5453;
+  return value - Math.floor(value);
+}
 
-  const random = (seed, x, y) => {
-    const value = Math.sin(seed * 0.0001 + x * 127.1 + y * 311.7) * 43758.5453;
-    return value - Math.floor(value);
+function createParticleCell(seed, x, y, columns) {
+  const scatter = random(seed, x, y);
+  const band = Math.floor(y / 5);
+  const edgeNoise = random(seed, 401, band);
+  const edge = columns * (0.04 + edgeNoise * 0.24);
+  const edgeDensity = Math.min(1, Math.max(0.08, (x - edge + 2) / 4));
+  if (scatter > 0.78 * edgeDensity) return null;
+  const period = 3.8 + random(seed, x + 47, y + 73) * 4.4;
+  const phase = random(seed, x + 131, y + 211) * Math.PI * 2;
+  const depth = 0.65 + random(seed, x + 307, y + 419) * 0.35;
+  return (time, visibility = 1, amplitude = 1) => {
+    const breath = (1 - Math.cos(time * Math.PI * 2 / period + phase)) / 2;
+    const reveal = Math.max(0, Math.min(1, (visibility - scatter) / (1 - scatter)));
+    const size = (0.36 + scatter / 0.78 * 0.22) * reveal;
+    const strength = (24 + 40 * x / Math.max(1, columns)) *
+      (0.9 + (breath - 0.5) * 0.7 * depth * amplitude) * reveal *
+      (0.65 + edgeDensity * 0.35);
+    return { size, strength };
   };
+}
 
+function mountDriftfield(canvas, options = {}) {
+  const ctx = canvas.getContext('2d');
+  const config = { color: '${state.color}', seed: 23, gap: 9, amplitude: ${state.speed / 42}, ...options };
+  let width = 0, height = 0, particles = [];
   const build = () => {
     width = canvas.clientWidth; height = canvas.clientHeight;
-    canvas.width = width * devicePixelRatio; canvas.height = height * devicePixelRatio;
-    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    const ratio = Math.min(1.5, devicePixelRatio || 1);
+    canvas.width = width * ratio; canvas.height = height * ratio;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    const columns = Math.ceil(width / config.gap);
+    const rows = Math.ceil(height / config.gap);
     particles = [];
-    for (let y = 0; y < height / config.gap; y++) {
-      for (let x = 0; x < width / config.gap; x++) {
-        const noise = random(23, x, y);
-        if (noise > config.density) continue;
-        particles.push({ x: x * config.gap, y: y * config.gap, phase: noise * 6.28 });
-      }
+    for (let y = 0; y < rows; y++) for (let x = 0; x < columns; x++) {
+      const sample = createParticleCell(config.seed, x, y, columns);
+      if (sample) particles.push({ x: x * config.gap + 4, y: y * config.gap + 4, sample });
     }
   };
-
   const paint = (time) => {
     ctx.clearRect(0, 0, width, height);
-    particles.forEach((particle) => {
-      const breath = (1 - Math.cos(time * 0.001 * config.speed + particle.phase)) / 2;
-      ctx.globalAlpha = 0.2 + breath * 0.45;
-      ctx.fillStyle = config.color;
-      ctx.fillRect(particle.x, particle.y, config.size, config.size);
+    const [r, g, b] = config.color.match(/.{2}/g).map(v => parseInt(v, 16));
+    particles.forEach(particle => {
+      const value = particle.sample(time / 1000, 1, config.amplitude);
+      const size = 8 * value.size;
+      ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + Math.min(1, value.strength / 100) + ')';
+      ctx.fillRect(particle.x - size / 2, particle.y - size / 2, size, size);
     });
     requestAnimationFrame(paint);
   };
-
   new ResizeObserver(build).observe(canvas);
   build(); requestAnimationFrame(paint);
 }
 
-mountDriftfield(document.querySelector('#particle-canvas'));`; $('codeOutput').innerHTML=escapeHtml(c).replace(/(const|function|return|forEach|new)/g,'<span class="key">$1</span>').replace(/(random|mountDriftfield|paint|fillRect|requestAnimationFrame)/g,'<span class="fn">$1</span>').replace(/(0\.\d+|\d+\.\d+)/g,'<span class="num">$1</span>')}
+mountDriftfield(document.querySelector('#particle-canvas'));`; $('codeOutput').innerHTML=escapeHtml(c).replace(/(const|function|return|forEach|new)/g,'<span class="key">$1</span>').replace(/(random|createParticleCell|mountDriftfield|paint|fillRect|requestAnimationFrame)/g,'<span class="fn">$1</span>').replace(/(0\.\d+|\d+\.\d+)/g,'<span class="num">$1</span>')}
 function escapeHtml(s){return s.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
 function copy(text,btn){navigator.clipboard?.writeText(text);const original=btn.innerHTML;btn.innerHTML='已复制 ✓';setTimeout(()=>btn.innerHTML=original,1400)}
 ['density','speed','size','glow'].forEach(id=>$(id).addEventListener('input',e=>{state[id]=+e.target.value;apply()}));$('particleColor').addEventListener('input',e=>{state.color=e.target.value;apply()});$('pointerToggle').addEventListener('click',()=>{state.pointer=!state.pointer;$('pointerToggle').classList.toggle('on',state.pointer)});$('perfToggle').addEventListener('click',()=>{state.lowPerf=!state.lowPerf;$('perfToggle').classList.toggle('on',state.lowPerf);build()});document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{state.preset=b.dataset.preset;Object.assign(state,presets[state.preset]);apply()}));document.querySelectorAll('[data-preset-card]').forEach(b=>b.addEventListener('click',()=>{state.preset=b.dataset.presetCard;Object.assign(state,presets[state.preset]);apply();location.hash='playground'}));$('randomize').addEventListener('click',()=>{state.seed=Math.floor(Math.random()*10000);state.density=20+Math.floor(Math.random()*80);state.speed=Math.floor(Math.random()*80);state.size=1+Math.floor(Math.random()*6);state.glow=Math.floor(Math.random()*55);apply()});$('copyAll').addEventListener('click',()=>copy(document.getElementById('codeOutput').textContent,$('copyAll')));$('downloadConfig').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='driftfield-config.json';a.click();URL.revokeObjectURL(a.href)});canvas.addEventListener('pointermove',e=>{const r=canvas.getBoundingClientRect();pointer.x=e.clientX-r.left;pointer.y=e.clientY-r.top;pointer.active=true});canvas.addEventListener('pointerleave',()=>pointer.active=false);window.addEventListener('resize',resize);resize();updateCode();requestAnimationFrame(draw);
