@@ -18,65 +18,63 @@ let lastFrame=0;
 function draw(t){if(t-lastFrame<33){raf=requestAnimationFrame(draw);return}lastFrame=t;ctx.clearRect(0,0,width,height);const sec=t/1000;const rgb=hexRgb(state.color);const amplitude=Math.max(.2,state.speed/42);const phase=sec*1.5;const cols=Math.ceil(width/9)+1;const left=width-(cols*9-1);for(const p of particles){const edgeNoise=flowingNoise(state.seed,0,p.gy+phase*.45);const baseEdge=cols*(.385+(edgeNoise-.5)*.33*amplitude);const visibility=state.density/100;const recession=1-visibility;const wave=Math.sin(p.gy*.72+phase*2.1+state.seed*.01)*2.4+(flowingNoise(state.seed+19,0,p.gy+phase*1.25)-.5)*10;const edge=baseEdge+recession*(cols+5-baseEdge)+recession*Math.sin(p.gy*.7+phase)*2+wave;const distance=p.gx-edge;if(distance<-32)continue;const noise=flowingNoise(state.seed,p.gx+11,p.gy+7+phase*1.15);const tailNoise=flowingNoise(state.seed+97,p.gx+7,p.gy+31+phase*1.8);const hotEmber=distance<0&&distance>=-8&&noise>.52;const trail=distance<-8&&tailNoise>.52+(-distance/32)*.18;const ember=hotEmber||trail;const visible=distance>=0?distance>2||noise>.18:ember;if(!visible)continue;const coverage=hotEmber?Math.min(1,(noise-.52)/.48):trail?Math.max(.2,(distance+32)/24):Math.min(1,Math.max(0,distance+.5));const tailFade=ember?1:Math.min(1,.2+Math.max(0,distance)/18*.8);let alpha=(hotEmber?.2+(noise-.52)*.62:trail?.06+tailNoise*.16:(.12+(p.gx/Math.max(1,cols-1))*.24+noise*.12)*tailFade)*coverage;const px=left+p.gx*9+4,py=p.gy*9+4;let ox=0,oy=0;const dist=Math.hypot(px-pointer.x,py-pointer.y);if(state.pointer&&pointer.active&&dist<180){const force=(1-dist/180)**2*8;ox=(px-pointer.x)/(dist||1)*force;oy=(py-pointer.y)/(dist||1)*force;alpha=Math.min(.96,alpha+(1-dist/180)**2*.34)}const size=(hotEmber?3.4+noise*2.4:trail?2.2+tailNoise*2.2:6.6+Math.min(1,Math.max(0,distance)/18)*1.4)*(state.size/3);ctx.fillStyle=`rgba(${rgb.join(',')},${Math.max(.025,Math.min(.9,alpha))})`;ctx.fillRect(px+ox-size/2,py+oy-size/2,size,size)}raf=requestAnimationFrame(draw)}
 function hexRgb(hex){const v=hex.replace('#','');return [parseInt(v.slice(0,2),16),parseInt(v.slice(2,4),16),parseInt(v.slice(4,6),16)]}
 function apply(){['density','speed','size','glow'].forEach(id=>$(id).value=state[id]);$('densityValue').textContent=state.density+'%';$('speedValue').textContent=state.speed+'%';$('sizeValue').textContent=state.size+' px';$('glowValue').textContent=state.glow+'%';$('particleColor').value=state.color;$('colorValue').textContent=state.color.toUpperCase();canvas.parentElement.style.background=presets[state.preset]?.bg||'#131516';document.querySelectorAll('.preset').forEach(b=>b.classList.toggle('active',b.dataset.preset===state.preset));build();updateCode()}
-function updateCode(){const c=`function random(seed, x, y) {
-  const value = Math.sin(seed * 0.0001 + x * 127.1 + y * 311.7) * 43758.5453;
-  return value - Math.floor(value);
+function updateCode(){const c=`function randomAt(seed, x, y) {
+  let value = seed ^ Math.imul(x + 1, 374761393) ^ Math.imul(y + 1, 668265263);
+  value = Math.imul(value ^ (value >>> 13), 1274126177);
+  return ((value ^ (value >>> 16)) >>> 0) / 4294967296;
 }
 
-function createParticleCell(seed, x, y, columns) {
-  const scatter = random(seed, x, y);
-  const band = Math.floor(y / 5);
-  const edgeNoise = random(seed, 401, band);
-  const edge = columns * (0.04 + edgeNoise * 0.24);
-  const edgeDensity = Math.min(1, Math.max(0.08, (x - edge + 2) / 4));
-  if (scatter > 0.78 * edgeDensity) return null;
-  const period = 3.8 + random(seed, x + 47, y + 73) * 4.4;
-  const phase = random(seed, x + 131, y + 211) * Math.PI * 2;
-  const depth = 0.65 + random(seed, x + 307, y + 419) * 0.35;
-  return (time, visibility = 1, amplitude = 1) => {
-    const breath = (1 - Math.cos(time * Math.PI * 2 / period + phase)) / 2;
-    const reveal = Math.max(0, Math.min(1, (visibility - scatter) / (1 - scatter)));
-    const size = (0.36 + scatter / 0.78 * 0.22) * reveal;
-    const strength = (24 + 40 * x / Math.max(1, columns)) *
-      (0.9 + (breath - 0.5) * 0.7 * depth * amplitude) * reveal *
-      (0.65 + edgeDensity * 0.35);
-    return { size, strength };
-  };
+function flowingNoise(seed, x, y) {
+  const row = Math.floor(y), fraction = y - row;
+  const blend = fraction * fraction * (3 - 2 * fraction);
+  return randomAt(seed, x, row) * (1 - blend) + randomAt(seed, x, row + 1) * blend;
+}
+
+function burningCell(seed, x, y, columns, time, visibility = 1, amplitude = 1) {
+  const phase = time * 1.5;
+  const edgeNoise = flowingNoise(seed, 0, y + phase * 0.9);
+  const wave = Math.sin(y * 0.72 + phase * 2.1) * 2.4;
+  const edge = columns * (0.385 + (edgeNoise - 0.5) * 0.33 * amplitude) + wave;
+  const distance = x - edge;
+  if (distance < -32) return null;
+  const noise = flowingNoise(seed, x + 11, y + 7 + phase * 1.15);
+  const tailNoise = flowingNoise(seed + 97, x + 7, y + 31 + phase * 1.8);
+  const hotEmber = distance < 0 && distance >= -8 && noise > 0.52;
+  const trail = distance < -8 && tailNoise > 0.52 + (-distance / 32) * 0.18;
+  const visible = distance >= 0 ? distance > 2 || noise > 0.18 : hotEmber || trail;
+  if (!visible) return null;
+  const coverage = hotEmber ? Math.min(1, (noise - 0.52) / 0.48) : trail ? Math.max(0.2, (distance + 32) / 24) : Math.min(1, Math.max(0, distance + 0.5));
+  const alpha = (hotEmber ? 0.2 + (noise - 0.52) * 0.62 : trail ? 0.06 + tailNoise * 0.16 : 0.12 + x / columns * 0.24 + noise * 0.12) * coverage;
+  return { alpha, size: hotEmber ? 3.5 : trail ? 3 : 7 };
 }
 
 function mountDriftfield(canvas, options = {}) {
   const ctx = canvas.getContext('2d');
-  const config = { color: '${state.color}', seed: 23, gap: 9, amplitude: ${state.speed / 42}, ...options };
-  let width = 0, height = 0, particles = [];
+  const config = { color: '${state.color}', seed: 23, density: ${state.density / 100}, speed: ${state.speed / 42}, gap: 9, ...options };
+  let width = 0, height = 0, columns = 0, rows = 0;
   const build = () => {
     width = canvas.clientWidth; height = canvas.clientHeight;
     const ratio = Math.min(1.5, devicePixelRatio || 1);
     canvas.width = width * ratio; canvas.height = height * ratio;
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    const columns = Math.ceil(width / config.gap);
-    const rows = Math.ceil(height / config.gap);
-    particles = [];
-    for (let y = 0; y < rows; y++) for (let x = 0; x < columns; x++) {
-      const sample = createParticleCell(config.seed, x, y, columns);
-      if (sample) particles.push({ x: x * config.gap + 4, y: y * config.gap + 4, sample });
-    }
+    columns = Math.ceil(width / config.gap) + 1; rows = Math.ceil(height / config.gap) + 1;
   };
   const paint = (time) => {
     ctx.clearRect(0, 0, width, height);
     const [r, g, b] = config.color.slice(1).match(/.{2}/g).map(v => parseInt(v, 16));
-    particles.forEach(particle => {
-      const value = particle.sample(time / 1000, 1, config.amplitude);
-      const size = 8 * value.size;
-      ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + Math.min(1, value.strength / 100) + ')';
-      ctx.fillRect(particle.x - size / 2, particle.y - size / 2, size, size);
-    });
+    const left = width - (columns * config.gap - 1);
+    for (let y = 0; y < rows; y++) for (let x = 0; x < columns; x++) {
+      const cell = burningCell(config.seed, x, y, columns, time / 1000, config.density, config.speed);
+      if (!cell) continue;
+      ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + Math.min(1, cell.alpha) + ')';
+      ctx.fillRect(left + x * config.gap + 4 - cell.size / 2, y * config.gap + 4 - cell.size / 2, cell.size, cell.size);
+    }
     requestAnimationFrame(paint);
   };
-  new ResizeObserver(build).observe(canvas);
-  build(); requestAnimationFrame(paint);
+  new ResizeObserver(build).observe(canvas); build(); requestAnimationFrame(paint);
 }
 
-mountDriftfield(document.querySelector('#particle-canvas'));`; $('codeOutput').innerHTML=escapeHtml(c).replace(/(const|function|return|forEach|new)/g,'<span class="key">$1</span>').replace(/(random|createParticleCell|mountDriftfield|paint|fillRect|requestAnimationFrame)/g,'<span class="fn">$1</span>').replace(/(0\.\d+|\d+\.\d+)/g,'<span class="num">$1</span>')}
+mountDriftfield(document.querySelector('#particle-canvas'));`; $('codeOutput').innerHTML=escapeHtml(c).replace(/(const|function|return|forEach|new)/g,'<span class="key">$1</span>').replace(/(randomAt|flowingNoise|burningCell|mountDriftfield|paint|fillRect|requestAnimationFrame)/g,'<span class="fn">$1</span>').replace(/(0\.\d+|\d+\.\d+)/g,'<span class="num">$1</span>')}
 function escapeHtml(s){return s.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
 function copy(text,btn){navigator.clipboard?.writeText(text);const original=btn.innerHTML;btn.innerHTML='已复制 ✓';setTimeout(()=>btn.innerHTML=original,1400)}
 ['density','speed','size','glow'].forEach(id=>$(id).addEventListener('input',e=>{state[id]=+e.target.value;apply()}));$('particleColor').addEventListener('input',e=>{state.color=e.target.value;apply()});$('pointerToggle').addEventListener('click',()=>{state.pointer=!state.pointer;$('pointerToggle').classList.toggle('on',state.pointer)});$('perfToggle').addEventListener('click',()=>{state.lowPerf=!state.lowPerf;$('perfToggle').classList.toggle('on',state.lowPerf);build()});document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{state.preset=b.dataset.preset;Object.assign(state,presets[state.preset]);apply()}));document.querySelectorAll('[data-preset-card]').forEach(b=>b.addEventListener('click',()=>{state.preset=b.dataset.presetCard;Object.assign(state,presets[state.preset]);apply();location.hash='playground'}));$('randomize').addEventListener('click',()=>{state.seed=Math.floor(Math.random()*10000);state.density=20+Math.floor(Math.random()*80);state.speed=Math.floor(Math.random()*80);state.size=1+Math.floor(Math.random()*6);state.glow=Math.floor(Math.random()*55);apply()});$('copyAll').addEventListener('click',()=>copy(document.getElementById('codeOutput').textContent,$('copyAll')));$('downloadConfig').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='driftfield-config.json';a.click();URL.revokeObjectURL(a.href)});canvas.addEventListener('pointermove',e=>{const r=canvas.getBoundingClientRect();pointer.x=e.clientX-r.left;pointer.y=e.clientY-r.top;pointer.active=true});canvas.addEventListener('pointerleave',()=>pointer.active=false);window.addEventListener('resize',resize);resize();updateCode();requestAnimationFrame(draw);
