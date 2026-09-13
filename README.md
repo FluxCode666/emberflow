@@ -31,7 +31,7 @@ React 和 Vue 3 版本默认从同目录的 `driftfield.js` 引入共享引擎�
 </script>
 ```
 
-可调参数：`color`、`density`、`speed`、`size`、`height`（50–500px）、`pointerStrength`（0–100%）、`tailVariance`（3–20 格）、`gapRate`（焰块空缺率，0–1，对应 0–100%）和 `gap`（粒子网格间距）。空缺率只会随机隐藏火焰及焰尾色块，不改变火焰轮廓或流动方向。展示页还提供 Midnight、Milk、Signal 三组预设、指针排斥、低性能模式和 JSON 配置导出。
+可调参数：`color`、`density`、`speed`、`size`、`height`（50–500px）、`pointerStrength`（0–100%）、`tailVariance`（3–20 格）、`gapRate`（焰块空缺率，0–1，对应 0–100%）和 `gap`（粒子网格间距）。焰长差距表示当前画面中最长与最短焰尾之间相差的网格数，默认 8 格。各行独立生长、回缩，最长和最短的位置会随时间更换；呼吸速度只控制色块向左流动，不改变焰长差距。窄画布会自动收拢尾部，避免尾尖被左边界裁齐。空缺率只会随机隐藏火焰及焰尾色块，不改变火焰轮廓或流动方向。展示页还提供 Midnight、Milk、Signal 三组预设、指针排斥、低性能模式和 JSON 配置导出。
 
 ## 文件
 
@@ -39,3 +39,14 @@ React 和 Vue 3 版本默认从同目录的 `driftfield.js` 引入共享引擎�
 - `styles.css`：编辑部式排版、暗色粒子画布、响应式布局与动效
 - `app.js`：确定性随机点阵、呼吸动画、指针交互、代码生成与配置导出
 - `driftfield.js`：可被其他项目直接引入的共享 Canvas 粒子引擎
+
+## 浏览器回归检查
+
+启动本地预览后，使用独立安装的 Playwright Core 和本机 Chrome：
+
+```bash
+npm install --prefix /tmp/driftfield-browser-tools --no-save playwright-core
+NODE_PATH=/tmp/driftfield-browser-tools/node_modules node tests/flame-contour.cjs
+```
+
+检查会在真实浏览器中采集 Canvas 绘制结果，验证最长／最短行换位、零空缺连续性、50／320／500px 高度、3／8／20 格焰长差距、速度与长度解耦，以及复制代码与独立引擎的一致性。截图和报告保存在 `/tmp/driftfield-contour`；可通过 `CHROME_PATH`、`FLAME_TEST_URL`、`FLAME_TEST_OUTPUT` 指定浏览器、服务地址和输出目录。

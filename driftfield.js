@@ -33,6 +33,36 @@ function mountDriftfield(canvas, options = {}) {
     return flowingNoise(seed, left, y) * (1 - blend) + flowingNoise(seed, left + 1, y) * blend;
   }
 
+  function sampleFlameRows(seed, rows, columns, seconds, density = 1, tailWidth = 32, tailVariance = 8) {
+    rows = Math.max(1, rows);
+    const strengths = new Float64Array(rows);
+    const edges = new Float64Array(rows);
+    let minimum = Infinity, maximum = -Infinity;
+    for (let y = 0; y < rows; y++) {
+      // Time has its own noise axis: rows grow/retract without scrolling a fixed profile vertically.
+      const value = flowingNoiseX(seed + 211, seconds * 0.48, y * 0.34 + 41) * 0.72
+        + flowingNoiseX(seed + 503, seconds * 0.77 + 17, y * 0.8 + 23) * 0.28;
+      strengths[y] = value;
+      minimum = Math.min(minimum, value);
+      maximum = Math.max(maximum, value);
+    }
+    const variance = Math.min(Math.max(3, Math.min(20, tailVariance)), Math.max(0, columns - 5));
+    const baseEdge = columns * 0.385;
+    const centerEdge = baseEdge + (1 - density) * (columns + 5 - baseEdge);
+    // Keep the complete tip range on the canvas, including narrow Tab previews.
+    const tipCenter = Math.max(2 + variance / 2,
+      Math.min(columns - 2 - variance / 2, centerEdge - tailWidth + variance / 2));
+    const tailLimit = Math.max(0, Math.min(tailWidth - variance / 2, centerEdge - tipCenter));
+    const range = maximum - minimum;
+    for (let y = 0; y < rows; y++) {
+      const strength = range > 0.00001 ? (strengths[y] - minimum) / range : 0.5;
+      strengths[y] = strength;
+      // Move the actual silhouette and its fade together; no row has a permanent length bias.
+      edges[y] = tipCenter + (0.5 - strength) * variance + tailLimit;
+    }
+    return { edges, strengths, tailLimit };
+  }
+
   function sampleAt(seed, x, y) {
     const value = Math.sin(seed * 0.0001 + x * 127.1 + y * 311.7) * 43758.5453;
     return value - Math.floor(value);
@@ -62,34 +92,25 @@ function mountDriftfield(canvas, options = {}) {
     if (document.hidden || time - lastFrame < 33) return;
     lastFrame = time;
     ctx.clearRect(0, 0, width, height);
-    // Speed controls texture flow only; keep the flame silhouette stable.
-    const shapeAmplitude = 1;
+    // Texture speed is independent from the contour clock and length range.
     const gridWidth = columns * config.gap;
     // Unbounded texture coordinates avoid a seam when the canvas width is crossed.
     const flowOffset = time / 1000 * (6 + config.speed * 10);
     const left = width - (gridWidth - 1);
-    const recession = 1 - config.density;
+    const contour = sampleFlameRows(config.seed, Math.ceil((height - 4) / config.gap), columns, time / 1000, config.density, 32, config.tailVariance);
     for (const p of particles) {
       const sampleX = p.x + flowOffset / config.gap;
       const fieldY = p.y * 0.42;
       const fieldX = sampleX * 0.42;
-      const edgeNoise = flowingNoise(config.seed, 0, fieldY);
-      const baseEdge = columns * (0.385 + (edgeNoise - 0.5) * 0.33 * shapeAmplitude);
-      const wave = Math.sin(p.y * 0.34 + config.seed * 0.01) * 2.4
-        + (flowingNoise(config.seed + 19, 0, fieldY) - 0.5) * 10;
-      const edge = baseEdge + recession * (columns + 5 - baseEdge)
-        + recession * Math.sin(fieldY * 0.7) * 2 + wave;
-      const distance = p.x - edge;
-      if (distance < -32) continue;
+      const row = Math.min(p.y, contour.edges.length - 1);
+      const distance = p.x - contour.edges[row];
+      const tailLimit = contour.tailLimit;
+      if (distance < -tailLimit) continue;
       const noise = flowingNoiseX(config.seed, fieldX + 11, fieldY + 7);
       const tailNoise = flowingNoiseX(config.seed + 97, fieldX + 7, fieldY + 31);
       const tailDrift = flowingNoiseX(config.seed + 503, p.x * 0.16 + time / 1000 * 0.48, p.y * 0.16 + 23);
-      const tailVariance = Math.max(3, Math.min(20, config.tailVariance));
-      // Keep one smooth, animated tail envelope per row so the longest row shifts naturally.
-      const rowTail = flowingNoiseX(config.seed + 211, p.y * 0.65 + time / 1000 * 0.32, 41);
+      const rowTail = contour.strengths[row];
       const tailSignal = Math.max(0, Math.min(1, tailNoise + (tailDrift - 0.5) * 0.26 + (rowTail - 0.5) * 0.16));
-      const tailLimit = 32 - tailVariance + rowTail * tailVariance;
-      if (distance < -tailLimit) continue;
       const tailProgress = Math.max(0, Math.min(1, (-distance - 8) / Math.max(1, tailLimit - 8)));
       const tone = Math.min(1, Math.max(0, (noise - 0.16) / 0.72));
       const gapRate = Math.max(0, Math.min(1, config.gapRate));
