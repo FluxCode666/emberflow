@@ -79,7 +79,9 @@ function mountDriftfield(canvas, options = {}) {
       const fade = hotEmber || trail ? 1 : Math.min(1, 0.2 + Math.max(0, distance) / 18 * 0.8);
       let alpha = (hotEmber ? 0.2 + (noise - 0.52) * 0.62 : trail ? 0.06 + tailNoise * 0.16
         : (0.12 + p.x / Math.max(1, columns - 1) * 0.24 + noise * 0.12) * fade) * coverage;
-      const px = left + p.x * config.gap + 4, py = p.y * config.gap + 4;
+      const tailDepth = Math.max(0, -distance);
+      const curl = (flowingNoise(config.seed + 211, p.x, p.y + phase * 1.4) - 0.5) * 4 + Math.sin(p.y * 0.45 + phase * 1.7) * 1.5;
+      const px = left + p.x * config.gap + 4, py = p.y * config.gap + 4 - tailDepth * 0.22 * config.gap + curl * (tailDepth / 32);
       let ox = 0, oy = 0;
       if (config.pointer && pointer.active) {
         const distanceToPointer = Math.hypot(px - pointer.x, py - pointer.y);
