@@ -1,4 +1,8 @@
-# Driftfield · 浮游粒子实验室
+# 流焰 · Emberflow
+
+可实时调节、可复制嵌入的粒子动效实验室。
+
+在线体验：<https://fluxcode666.github.io/emberflow/>
 
 从 oh-my-tab 的粒子点阵视觉抽离出的独立效果展示页。整个页面是零构建依赖的原生 HTML / CSS / Canvas，可以直接部署到静态托管，也可以把粒子画布嵌入其他项目。粒子采样算法按参考项目的 `particle-texture.ts` 迁移，保留确定性随机、边缘密度、独立呼吸周期和强度计算。
 
@@ -9,6 +13,10 @@ python3 -m http.server 4173
 ```
 
 然后打开 <http://127.0.0.1:4173>。
+
+## GitHub Pages 部署
+
+推送到 `main` 分支后，GitHub Actions 会校验 JavaScript 并自动发布静态页面。部署工作流位于 `.github/workflows/deploy-pages.yml`，仅发布页面、样式和粒子引擎文件。仓库的 Settings → Pages → Source 使用 **GitHub Actions**。
 
 ## 可复用方式
 
