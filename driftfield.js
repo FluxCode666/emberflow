@@ -62,7 +62,8 @@ function mountDriftfield(canvas, options = {}) {
     if (document.hidden || time - lastFrame < 33) return;
     lastFrame = time;
     ctx.clearRect(0, 0, width, height);
-    const amplitude = Math.max(0.2, config.speed);
+    // Speed controls texture flow only; keep the flame silhouette stable.
+    const shapeAmplitude = 1;
     const gridWidth = columns * config.gap;
     // Unbounded texture coordinates avoid a seam when the canvas width is crossed.
     const flowOffset = time / 1000 * (6 + config.speed * 10);
@@ -73,7 +74,7 @@ function mountDriftfield(canvas, options = {}) {
       const fieldY = p.y * 0.42;
       const fieldX = sampleX * 0.42;
       const edgeNoise = flowingNoise(config.seed, 0, fieldY);
-      const baseEdge = columns * (0.385 + (edgeNoise - 0.5) * 0.33 * amplitude);
+      const baseEdge = columns * (0.385 + (edgeNoise - 0.5) * 0.33 * shapeAmplitude);
       const wave = Math.sin(p.y * 0.34 + config.seed * 0.01) * 2.4
         + (flowingNoise(config.seed + 19, 0, fieldY) - 0.5) * 10;
       const edge = baseEdge + recession * (columns + 5 - baseEdge)
