@@ -26,12 +26,15 @@ React 和 Vue 3 版本默认从同目录的 `driftfield.js` 引入共享引擎�
     size: 3,
     height: 320,
     pointerStrength: 30,
-    gapRate: 0.3
+    pointer: false,
+    gapRate: 0
   })
 </script>
 ```
 
 可调参数：`color`、`density`、`speed`、`size`、`height`（50–500px）、`pointerStrength`（0–100%）、`tailVariance`（3–20 格）、`gapRate`（焰块空缺率，0–1，对应 0–100%）和 `gap`（粒子网格间距）。焰长差距表示当前画面中最长与最短焰尾之间相差的网格数，默认 8 格。各行独立生长、回缩，最长和最短的位置会随时间更换；呼吸速度只控制色块向左流动，不改变焰长差距。窄画布会自动收拢尾部，避免尾尖被左边界裁齐。空缺率只会随机隐藏火焰及焰尾色块，不改变火焰轮廓或流动方向。展示页还提供 Midnight、Milk、Signal 三组预设、指针排斥、低性能模式和 JSON 配置导出。
+
+默认焰块空缺率为 0%，指针排斥关闭，可通过配置面板启用。
 
 ## 文件
 

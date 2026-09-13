@@ -1,6 +1,6 @@
 const canvas = document.getElementById('particleCanvas');
 const ctx = canvas.getContext('2d');
-const state = { density: 68, speed: 42, size: 3, tailVariance: 8, gapRate: 30, height: 320, glow: 24, pointerStrength: 30, color: '#f5f0e8', pointer: true, lowPerf: false, seed: 23, preset: 'midnight' };
+const state = { density: 68, speed: 42, size: 3, tailVariance: 8, gapRate: 0, height: 320, glow: 24, pointerStrength: 30, color: '#f5f0e8', pointer: false, lowPerf: false, seed: 23, preset: 'midnight' };
 const presets = { midnight:{density:68,speed:42,size:3,glow:24,color:'#f5f0e8',bg:'#131516'}, milk:{density:57,speed:30,size:3,glow:12,color:'#242628',bg:'#eeebe3'}, signal:{density:78,speed:66,size:2,glow:48,color:'#ff6741',bg:'#17191a'} };
 let particles=[], width=0,height=0,dpr=1,pointer={x:-9999,y:-9999,active:false}, raf;
 let activeCodeLanguage='javascript', codeVariants={};
@@ -69,7 +69,7 @@ function flowingNoiseX(seed, x, y) {
 
 ${sampleFlameRows.toString()}
 
-function burningCell(seed, x, y, columns, time, contour, sampleX = x, gapRate = 30) {
+function burningCell(seed, x, y, columns, time, contour, sampleX = x, gapRate = 0) {
   const fieldY = y * 0.42;
   const fieldX = sampleX * 0.42;
   const row = Math.min(y, contour.edges.length - 1);

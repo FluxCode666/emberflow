@@ -49,7 +49,7 @@ async function setup(browser, { width = 1800, height = 320, variance = 8, speed 
   for (const [id, value] of Object.entries({height, tailVariance: variance, speed, gapRate: gap})) {
     await page.locator(`#${id}`).fill(String(value));
   }
-  await page.locator('#pointerToggle').click();
+  if (await page.locator('#pointerToggle').evaluate(el => el.classList.contains('on'))) await page.locator('#pointerToggle').click();
   await page.mouse.move(0, 0);
   await page.locator('#particleCanvas').evaluate(el => el.scrollIntoView({ block: 'center' }));
   return page;

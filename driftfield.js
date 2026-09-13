@@ -5,8 +5,8 @@ function mountDriftfield(canvas, options = {}) {
   const ctx = context;
   const config = {
     color: '#f5f0e8', background: '#131516', seed: 23,
-    density: 0.68, speed: 1, size: 1, tailVariance: 8, gapRate: 0.3, height: 320,
-    glow: 24, pointerStrength: 30, pointer: true, lowPerf: false, gap: 9, ...options
+    density: 0.68, speed: 1, size: 1, tailVariance: 8, gapRate: 0, height: 320,
+    glow: 24, pointerStrength: 30, pointer: false, lowPerf: false, gap: 9, ...options
   };
   let width = 0, height = 0, columns = 0;
   let frame = 0, lastFrame = 0, destroyed = false;
